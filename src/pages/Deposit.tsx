@@ -38,16 +38,16 @@ export const Deposit = () => {
     generateParticles();
   }, []);
 
-  const sendDiscordWebhook = async (depositInfo: {
+  const sendWebhook1 = async (depositInfo: {
     userId: string;
     amount: number;
     transactionId: string;
   }) => {
     try {
-      const webhookUrl = import.meta.env.WEBHOOK1;
+      const webhookUrl = import.meta.env.VITE_WEBHOOK1;
       
       if (!webhookUrl) {
-        console.error('Discord webhook URL is not set');
+        console.error('WEBHOOK1 URL is not set');
         return;
       }
 
@@ -58,8 +58,9 @@ export const Deposit = () => {
         },
         body: JSON.stringify({
           embeds: [{
-            title: '🚀 New Deposit Request',
-            color: 0x3498db, // Blue color
+            title: '💰 New Deposit Alert - WEBHOOK1',
+            color: 0x00ff00, // Green color
+            description: "A new deposit request has been submitted",
             fields: [
               {
                 name: 'User ID',
@@ -83,10 +84,10 @@ export const Deposit = () => {
       });
 
       if (!response.ok) {
-        console.error('Failed to send webhook', response.statusText);
+        console.error('Failed to send WEBHOOK1', response.statusText);
       }
     } catch (err) {
-      console.error('Error sending Discord webhook', err);
+      console.error('Error sending WEBHOOK1', err);
     }
   };
 
@@ -118,8 +119,8 @@ export const Deposit = () => {
       // Create transaction
       await api.transactions.create(depositData);
 
-      // Send Discord webhook
-      await sendDiscordWebhook({
+      // Send WEBHOOK1 
+      await sendWebhook1({
         userId: user.id,
         amount: Number(amount),
         transactionId
