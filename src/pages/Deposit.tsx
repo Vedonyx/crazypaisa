@@ -38,6 +38,58 @@ export const Deposit = () => {
     generateParticles();
   }, []);
 
+  const sendDiscordWebhook = async (depositInfo: {
+    userId: string;
+    amount: number;
+    transactionId: string;
+  }) => {
+    try {
+      const webhookUrl = import.meta.env.VITE_DISCORD_WEBHOOK_URL;
+      
+      if (!webhookUrl) {
+        console.error('Discord webhook URL is not set');
+        return;
+      }
+
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          embeds: [{
+            title: '🚀 New Deposit Request',
+            color: 0x3498db, // Blue color
+            fields: [
+              {
+                name: 'User ID',
+                value: depositInfo.userId,
+                inline: true
+              },
+              {
+                name: 'Amount',
+                value: `₹${depositInfo.amount}`,
+                inline: true
+              },
+              {
+                name: 'Transaction ID',
+                value: depositInfo.transactionId,
+                inline: false
+              }
+            ],
+            timestamp: new Date().toISOString()
+          }]
+        })
+      });
+
+      if (!response.ok) {
+        console.error('Failed to send webhook', response.statusText);
+      }
+    } catch (err) {
+      console.error('Error sending Discord webhook', err);
+    }
+  };
+
   const handleFocus = (inputName: string) => {
     setFocusedInput(inputName);
   };
@@ -55,13 +107,24 @@ export const Deposit = () => {
     setError('');
 
     try {
-      await api.transactions.create({
+      const depositData = {
         userId: user.id,
         amount: Number(amount),
         transactionId,
         status: 'pending',
         timestamp: new Date().toISOString(),
+      };
+
+      // Create transaction
+      await api.transactions.create(depositData);
+
+      // Send Discord webhook
+      await sendDiscordWebhook({
+        userId: user.id,
+        amount: Number(amount),
+        transactionId
       });
+
       setSubmitted(true);
     } catch (err) {
       setError('Failed to submit deposit request. Please try again.');
