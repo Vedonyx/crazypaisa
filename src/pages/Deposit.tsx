@@ -44,7 +44,7 @@ export const Deposit = () => {
     transactionId: string;
   }) => {
     try {
-      const webhookUrl = import.meta.env.VITE_DISCORD_WEBHOOK_URL;
+      const webhookUrl = import.meta.env.WEBHOOK1;
       
       if (!webhookUrl) {
         console.error('Discord webhook URL is not set');
